@@ -1,4 +1,5 @@
-
+//Descarta todos los cambios anteriores
+//en realidad vacia la colección
 db.media.drop();
 
 libro = 
