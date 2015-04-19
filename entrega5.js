@@ -215,9 +215,17 @@ uno = db.ensayo.aggregate(
 );
 
 
+uno = db.ensayo.aggregate([   
+	{$match: {producto:"mesas",color:"rojo"}},
+    {$sort : {fechafabricacion : 1}},
+    {$limit: 30 }], 
+	{   explain: true});
 
 
+db.ensayo.aggregate([{$match: {producto:"mesas",color:"rojo"}},{$sort : {fechafabricacion : 1}},{$limit: 30 }], {   explain: true});
 
+
+db.ensayo.createIndex({producto:1,color:1});
 
 
 
