@@ -37,6 +37,7 @@ dos = db.prueba.aggregate([
    explain: true
 })
 
+
 //RESULTADOS
 x = {
 	"stages" : [
@@ -189,14 +190,29 @@ y = {
 
 
 //SEGUNDA PARTE
+db.ensayo.drop();
 
 var productos = ["mesas","sillas"];
 var colores = ["azul","marron","negro","rosa","rojo","blanco","amarillo"];
 var fechafabricacion = new Date();
 fechafabricacion.setYear(2000);
 
+for (var i=0; i<90000; ++i){
+	db.ensayo.insert(
+	{
+		producto: productos[Math.floor(Math.random()*productos.length)], 
+		color: colores[Math.floor(Math.random()*colores.length)],
+		fechafabricacion:fechafabricacion
+	}
+	);
+}
 
 
+uno = db.ensayo.aggregate(
+    {$match: {producto:"mesas",color:"rojo"}},
+    {$sort : {fechafabricacion : 1}},
+    {$limit: 30 }
+);
 
 
 
