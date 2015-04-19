@@ -25,14 +25,6 @@ uno = db.prueba.aggregate(
     {$project: {"_id":0,"total":1}}
 );
 
-// dos = db.prueba.aggregate(
-// 	{$project: {a_gt_b: {$cmp: ['$num-a','$num-b']}}},
-//     {$match: {a_gt_b:{$gt:0}}},
-//     {$group:{"_id":"$a_gt_b",total:{"$sum":1}}},
-//     {$project: {"_id":0,"total":1}}
-// ).explain();
-
-
 dos = db.prueba.aggregate([
    {$project: {a_gt_b: {$cmp: ['$num-a','$num-b']}}},
     {$match: {a_gt_b:{$gt:0}}},
@@ -41,3 +33,155 @@ dos = db.prueba.aggregate([
 ], {
    explain: true
 })
+
+//RESULTADOS
+x = {
+	"stages" : [
+		{
+			"$cursor" : {
+				"query" : {
+					
+				},
+				"fields" : {
+					"num-a" : 1,
+					"num-b" : 1,
+					"_id" : 1
+				},
+				"plan" : {
+					"cursor" : "BasicCursor",
+					"isMultiKey" : false,
+					"scanAndOrder" : false,
+					"allPlans" : [
+						{
+							"cursor" : "BasicCursor",
+							"isMultiKey" : false,
+							"scanAndOrder" : false
+						}
+					]
+				}
+			}
+		},
+		{
+			"$project" : {
+				"a_gt_b" : {
+					"$cmp" : [
+						"$num-a",
+						"$num-b"
+					]
+				}
+			}
+		},
+		{
+			"$match" : {
+				"a_gt_b" : {
+					"$gt" : 0
+				}
+			}
+		},
+		{
+			"$group" : {
+				"_id" : "$a_gt_b",
+				"total" : {
+					"$sum" : {
+						"$const" : 1
+					}
+				}
+			}
+		},
+		{
+			"$project" : {
+				"_id" : false,
+				"total" : true
+			}
+		}
+	],
+	"ok" : 1
+}
+
+
+
+// 1. ¿Como ha llevado a cabo la operación?
+// No se selecciona un indice, se elige el recorrido de todos los documentos.
+// 2. ¿Cúantos documentos ha tenido que consultar? 
+//Todos.
+// 3. ¿Cuánto tarda en realizar la consulta?
+//53+3+3 microsengundos
+// 4. Obten las estadísticas de ejecución de la consulta
+//
+
+dos = db.prueba.aggregate([   
+	{$project: {a_gt_b: {$cmp: ['$num-a','$num-b']}}},    
+	{$match: {a_gt_b:{$gt:0}}},    
+	{$group:{"_id":"$a_gt_b",total:{"$sum":1}}},    
+	{$project: {"_id":0,"total":1}}], 
+	{   explain: true});
+
+> db.system.profile.find().limit(1).sort({ts:-1}).pretty()
+{
+	"op" : "command",
+	"ns" : "test.$cmd",
+	"command" : {
+		"aggregate" : "prueba",
+		"pipeline" : [
+			{
+				"$project" : {
+					"a_gt_b" : {
+						"$cmp" : [
+							"$num-a",
+							"$num-b"
+						]
+					}
+				}
+			},
+			{
+				"$match" : {
+					"a_gt_b" : {
+						"$gt" : 0
+					}
+				}
+			},
+			{
+				"$group" : {
+					"_id" : "$a_gt_b",
+					"total" : {
+						"$sum" : 1
+					}
+				}
+			},
+			{
+				"$project" : {
+					"_id" : 0,
+					"total" : 1
+				}
+			}
+		],
+		"explain" : true,
+		"cursor" : {
+			
+		}
+	},
+	"keyUpdates" : 0,
+	"numYield" : 0,
+	"lockStats" : {
+		"timeLockedMicros" : {
+			"r" : NumberLong(53),
+			"w" : NumberLong(0)
+		},
+		"timeAcquiringMicros" : {
+			"r" : NumberLong(3),
+			"w" : NumberLong(3)
+		}
+	},
+	"responseLength" : 502,
+	"millis" : 0,
+	"execStats" : {
+		
+	},
+	"ts" : ISODate("2015-04-19T20:00:30.809Z"),
+	"client" : "127.0.0.1",
+	"allUsers" : [ ],
+	"user" : ""
+}
+
+
+
