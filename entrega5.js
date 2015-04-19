@@ -192,7 +192,8 @@ y = {
 
 var productos = ["mesas","sillas"];
 var colores = ["azul","marron","negro","rosa","rojo","blanco","amarillo"];
-
+var fechafabricacion = new Date();
+fechafabricacion.setYear(2000);
 
 
 
