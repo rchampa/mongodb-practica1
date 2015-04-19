@@ -1,5 +1,8 @@
 db.prueba.drop();
 
+
+//PRIMERA PARTE
+
 for($i=1; $i<100; $i++){
 	db.prueba.insert({
 		"_id":ObjectId(),
@@ -116,8 +119,8 @@ dos = db.prueba.aggregate([
 	{$project: {"_id":0,"total":1}}], 
 	{   explain: true});
 
-> db.system.profile.find().limit(1).sort({ts:-1}).pretty()
-{
+db.system.profile.find().limit(1).sort({ts:-1}).pretty();
+y = {
 	"op" : "command",
 	"ns" : "test.$cmd",
 	"command" : {
@@ -182,6 +185,27 @@ dos = db.prueba.aggregate([
 	"allUsers" : [ ],
 	"user" : ""
 }
+
+
+
+//SEGUNDA PARTE
+
+var productos = ["mesas","sillas"];
+var colores = ["azul","marron","negro","rosa","rojo","blanco","amarillo"];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
